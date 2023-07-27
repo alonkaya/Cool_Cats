@@ -1,26 +1,104 @@
-from tkinter import *
+import tkinter as tk
+from tkinter import messagebox
 from textblob import TextBlob
 
+class WhatsAppLikeApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("WhatsApp-like GUI")
 
-def submit():
-    input_text = text.get("1.0", END)
-    blob_text = TextBlob(input_text)
+        self.title_frame = tk.Frame(root)
+        self.title_frame.pack(side=tk.TOP, fill=tk.X)
+        
+        # Add your picture here and provide the correct path
+        self.photo = tk.PhotoImage(file="C:\\Users\\User\\OneDrive\\Pictures\\Github_pic.png")
+        self.photo = self.photo.subsample(10, 10)  # Resize the picture (change the subsample values to resize differently)
+        self.photo_label = tk.Label(self.title_frame, image=self.photo)
+        self.photo_label.pack(side=tk.LEFT, padx=5, pady=5)
+
+        self.title_label = tk.Label(self.title_frame, text="Girlfriend <3", font=("Helvetica", 14, "bold"))
+        self.title_label.pack(side=tk.LEFT, padx=5, pady=5)
+        
+        self.message_frame = tk.Frame(root)
+        self.message_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        
+        self.typing_area = tk.Text(root, height=3, wrap=tk.WORD)
+        self.typing_area.pack(side=tk.BOTTOM, fill=tk.BOTH, padx=5, pady=5)
+        
+        self.send_button = tk.Button(root, text="Send", command=self.send_message)
+        self.send_button.pack(side=tk.BOTTOM, pady=5)
+
+        self.message_list = []
+        self.current_side = "right"
+        self.current_row = 0
+        
+    def send_message(self):
+        message = self.typing_area.get("1.0", tk.END).strip()
+        if message:
+            if is_angry(message):
+                self.show_custom_popup(message)
+            else:
+                self.typing_area.delete("1.0", tk.END)
+
+                side = self.current_side
+                self.current_side = "left" if self.current_side == "right" else "right"
+                
+                message_label = tk.Label(self.message_frame, text=message, bg="lightgreen", padx=10, pady=5, wraplength=200)
+                
+                # If it's on the right side, stick it to the right border of the window and anchor it to the east
+                if side == "right":
+                    message_label.grid(row=self.current_row, column=1, padx=(0, 10), pady=5, sticky="e")
+                    self.message_frame.grid_columnconfigure(1, weight=1)  # Make the second column expand to the right
+                else:
+                    message_label.grid(row=self.current_row, column=0, padx=(10, 0), pady=5, sticky="w")
+
+                self.current_row += 1
+                
+                self.message_list.append(message_label)
+
+    def show_custom_popup(self, message):
+        popup_window = tk.Toplevel(self.root)
+        popup_window.title("Angry Alert")
+
+        label = tk.Label(popup_window, text="Hey there big fellow, I've noticed you're a bit angry. Would you like to take a minute to calm and rephrase after you've cooled?")
+        label.pack(padx=10, pady=10)
+
+        send_anyway_button = tk.Button(popup_window, text="Send Anyway", command=lambda: self.send_message_after_popup(message, popup_window))
+        send_anyway_button.pack(side=tk.LEFT, padx=5, pady=5)
+
+        try_again_button = tk.Button(popup_window, text="Try Again Later", command=popup_window.destroy)
+        try_again_button.pack(side=tk.LEFT, padx=5, pady=5)
+
+    def send_message_after_popup(self, message, popup_window):
+        popup_window.destroy()  # Close the pop-up window
+        self.typing_area.delete("1.0", tk.END)
+
+        side = self.current_side
+        self.current_side = "left" if self.current_side == "right" else "right"
+        
+        message_label = tk.Label(self.message_frame, text=message, bg="lightgreen", padx=10, pady=5, wraplength=200)
+        
+        # If it's on the right side, stick it to the right border of the window and anchor it to the east
+        if side == "right":
+            message_label.grid(row=self.current_row, column=1, padx=(0, 10), pady=5, sticky="e")
+            self.message_frame.grid_columnconfigure(1, weight=1)  # Make the second column expand to the right
+        else:
+            message_label.grid(row=self.current_row, column=0, padx=(10, 0), pady=5, sticky="w")
+
+        self.current_row += 1
+        
+        self.message_list.append(message_label)
+
+def is_angry(message):
+    blob_text = TextBlob(message)
     sentiment = blob_text.sentiment 
     polarity = sentiment.polarity
-
     if polarity < -0.6:
-        label.config(text= "Hey there big fellow :) I noticed you're angry\n would you like to take a break and send this message later?")
+        return True
     else:
-        label.config(text=input_text)  # Set the text of the label to the input_text
+        return False
 
-window = Tk()
-text = Text(window, font=("Ink Free", 25), height=8, width=30)
-text.pack()
-
-button = Button(window, text="Submit", command=submit)
-button.pack()
-
-label = Label(window, font=("Ink Free", 25), height=8, width=30, wraplength=300)
-label.pack()
-
-window.mainloop()
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = WhatsAppLikeApp(root)
+    root.mainloop()
