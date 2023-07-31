@@ -3,7 +3,7 @@ from tkinter import messagebox
 from textblob import TextBlob
 
 class WhatsAppLikeApp:
-    def __init__(self, root):
+    def __init__(self, root, polarity_threshold=-0.3):
         self.root = root
         self.root.title("WhatsApp-like GUI")
 
@@ -11,7 +11,7 @@ class WhatsAppLikeApp:
         self.title_frame.pack(side=tk.TOP, fill=tk.X)
         
         # Add your picture here and provide the correct path
-        self.photo = tk.PhotoImage(file="C:\\Users\\User\\OneDrive\\Pictures\\Github_pic.png")
+        self.photo = tk.PhotoImage(file='chat_image.png')
         self.photo = self.photo.subsample(10, 10)  # Resize the picture (change the subsample values to resize differently)
         self.photo_label = tk.Label(self.title_frame, image=self.photo)
         self.photo_label.pack(side=tk.LEFT, padx=5, pady=5)
@@ -31,11 +31,13 @@ class WhatsAppLikeApp:
         self.message_list = []
         self.current_side = "right"
         self.current_row = 0
+
+        self.polarity_threshold = polarity_threshold
         
     def send_message(self):
         message = self.typing_area.get("1.0", tk.END).strip()
         if message:
-            if is_angry(message):
+            if self.is_angry(message):
                 self.show_custom_popup(message)
             else:
                 self.typing_area.delete("1.0", tk.END)
@@ -89,14 +91,15 @@ class WhatsAppLikeApp:
         
         self.message_list.append(message_label)
 
-def is_angry(message):
-    blob_text = TextBlob(message)
-    sentiment = blob_text.sentiment 
-    polarity = sentiment.polarity
-    if polarity < -0.6:
-        return True
-    else:
-        return False
+    def is_angry(self, message):
+        blob_text = TextBlob(message)
+        sentiment = blob_text.sentiment
+        polarity = sentiment.polarity
+        print(polarity)
+        if polarity < self.polarity_threshold:
+            return True
+        else:
+            return False
 
 if __name__ == "__main__":
     root = tk.Tk()
