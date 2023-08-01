@@ -1,9 +1,10 @@
 import tkinter as tk
-from tkinter import messagebox
 from textblob import TextBlob
 
+angry_text_threshold = -0.3
+
 class WhatsAppLikeApp:
-    def __init__(self, root, polarity_threshold=-0.3):
+    def __init__(self, root, camera):
         self.root = root
         self.root.title("WhatsApp-like GUI")
 
@@ -32,10 +33,12 @@ class WhatsAppLikeApp:
         self.current_side = "right"
         self.current_row = 0
 
-        self.polarity_threshold = polarity_threshold
+        self.camera = camera
+
         
     def send_message(self):
         message = self.typing_area.get("1.0", tk.END).strip()
+        print(self.camera.pred)
         if message:
             if self.is_angry(message):
                 self.show_custom_popup(message)
@@ -62,14 +65,19 @@ class WhatsAppLikeApp:
         popup_window = tk.Toplevel(self.root)
         popup_window.title("Angry Alert")
 
-        label = tk.Label(popup_window, text="Hey there big fellow, I've noticed you're a bit angry. Would you like to take a minute to calm and rephrase after you've cooled?")
+        label = tk.Label(popup_window, text="""Hey there big fellow, your heart rate is a bit high and you seem 
+                                            kind of angry, are you sure you want to send this?          
+                                                """)
         label.pack(padx=10, pady=10)
 
-        send_anyway_button = tk.Button(popup_window, text="Send Anyway", command=lambda: self.send_message_after_popup(message, popup_window))
+        send_anyway_button = tk.Button(popup_window, text="Send anyway", command=lambda: self.send_message_after_popup(message, popup_window))
         send_anyway_button.pack(side=tk.LEFT, padx=5, pady=5)
 
-        try_again_button = tk.Button(popup_window, text="Try Again Later", command=popup_window.destroy)
+        try_again_button = tk.Button(popup_window, text="Let me think about it", command=popup_window.destroy)
         try_again_button.pack(side=tk.LEFT, padx=5, pady=5)
+
+        try_again_button = tk.Button(popup_window, text="send cooler rephrase: ", command=popup_window.destroy)
+        try_again_button.pack(side=tk.LEFT, padx=5, pady=5)        
 
     def send_message_after_popup(self, message, popup_window):
         popup_window.destroy()  # Close the pop-up window
@@ -95,13 +103,9 @@ class WhatsAppLikeApp:
         blob_text = TextBlob(message)
         sentiment = blob_text.sentiment
         polarity = sentiment.polarity
-        print(polarity)
-        if polarity < self.polarity_threshold:
+        if polarity < angry_text_threshold and ('Angry' in self.camera.pred_buffer or
+                                                'Sad' in self.camera.pred_buffer or
+                                                'Disgust' in self.camera.pred_buffer):
             return True
         else:
-            return False
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = WhatsAppLikeApp(root)
-    root.mainloop()
+            return False        
