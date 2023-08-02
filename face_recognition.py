@@ -1,7 +1,4 @@
 import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
-# import utils
 import os
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.layers import Dense, Input, Dropout,Flatten, Conv2D
@@ -65,9 +62,12 @@ def face_gen(camera):
     while True:
         frame = camera.get_frame()
         cv2.imshow('Facial Expression Recognization',frame)
+        cv2.resizeWindow('Facial Expression Recognization', 500, 400)  # Set the desired size (width, height)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
     cv2.destroyAllWindows()
 
-if __name__ == '__main__':
-    face_gen(VideoCamera())
+
+
+# if __name__ == '__main__':
+#     face_gen(VideoCamera())

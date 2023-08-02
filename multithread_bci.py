@@ -6,7 +6,6 @@ from brainflow.data_filter import DataFilter, FilterTypes
 import threading
 
 import tkinter as tk
-from textblob import TextBlob
 
 from gui import WhatsAppLikeApp
 from face_recognition import VideoCamera, face_gen
@@ -44,7 +43,7 @@ def get_data():
 
 def start_gui():
     root = tk.Tk()
-    app = WhatsAppLikeApp(root, camera)
+    WhatsAppLikeApp(root, camera)
     root.mainloop()
 
 def start_face_recogition():
